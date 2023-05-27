@@ -1,9 +1,19 @@
-import React from "react";
+"use client";
+
+
+import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
 import Link from "next/link";
 
 const Login = () => {
+
+  const [values, setValues] = useState({
+    email: "",
+    password: "",
+  })
+
+  
   return (
     <main className="flex flex-col lg:flex-row lg:h-screen">
       <div className="w-full lg:w-2/5">
