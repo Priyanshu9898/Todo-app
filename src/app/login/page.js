@@ -5,13 +5,53 @@ import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
+import { auth } from "../../firebase/firebase.js";
+import { redirect } from "next/navigation";
 
 const Login = () => {
+
+  const provider = new GoogleAuthProvider();
 
   const [values, setValues] = useState({
     email: "",
     password: "",
   })
+
+  const handleChange = (e) => {
+    setValues({...values, [e.target.name]: e.target.value});
+  }
+
+  const handleGoogleSignIn = async () => {
+    const user = await signInWithPopup(auth, provider);
+    console.log(user);
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const {email, password} = values;
+
+    if(!email || !password) {
+      return;
+    }
+
+    console.log(email, password);
+
+    try{
+      const user = await signInWithEmailAndPassword(auth, email, password);
+      console.log(user);
+    }
+    catch(err){
+      console.log(err);
+    }
+
+
+  }
 
   
   return (
@@ -23,6 +63,7 @@ const Login = () => {
             alt="Login Banner"
             fill={true}
             className="object-cover"
+            priority={true}
           />
         </div>
       </div>
@@ -36,7 +77,7 @@ const Login = () => {
             </Link>
           </p>
 
-          <div className="bg-black/[0.05] text-white w-full py-4 mt-10 rounded-full transition-transform hover:bg-black/[0.8] active:scale-90 flex justify-center items-center gap-4 cursor-pointer group">
+          <div onClick={handleGoogleSignIn} className="bg-black/[0.05] text-white w-full py-4 mt-10 rounded-full transition-transform hover:bg-black/[0.8] active:scale-90 flex justify-center items-center gap-4 cursor-pointer group">
             <FcGoogle size={22} />
             <span className="font-medium text-black group-hover:text-white">
               Login with Google
@@ -48,6 +89,10 @@ const Login = () => {
             <input
               type="text"
               id="email"
+              name="email"
+              value={values.email}
+              onChange={handleChange}
+              required
               className="font-medium border-b border-black p-4 outline-0 focus-within:border-blue-400"
             />
           </div>
@@ -56,10 +101,14 @@ const Login = () => {
             <input
               type="password"
               id="password"
+              name="password"
+              value={values.password}
+              onChange={handleChange}
+              required
               className="font-medium border-b border-black p-4 outline-0 focus-within:border-blue-400"
             />
           </div>
-          <button className="bg-black text-white w-44 py-4 mt-10 rounded-full transition-transform hover:bg-black/[0.8] active:scale-90">
+          <button onClick={handleSubmit} className="bg-black text-white w-44 py-4 mt-10 rounded-full transition-transform hover:bg-black/[0.8] active:scale-90">
             Sign in
           </button>
         </div>

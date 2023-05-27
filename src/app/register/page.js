@@ -86,6 +86,7 @@ const Register = () => {
             alt="Login Banner"
             fill={true}
             className="object-cover"
+            priority={true}
           />
         </div>
       </div>
