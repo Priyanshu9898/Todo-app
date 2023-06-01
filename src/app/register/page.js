@@ -4,43 +4,42 @@ import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
 import Link from "next/link";
-import { GoogleAuthProvider, createUserWithEmailAndPassword, updateProfile, signInWithPopup} from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signInWithPopup,
+} from "firebase/auth";
 import { auth } from "../../firebase/firebase.js";
-import { redirect } from 'next/navigation';
-
-
-
+import { redirect } from "next/navigation";
 
 const Register = () => {
-
   const provider = new GoogleAuthProvider();
 
   const [values, setValues] = useState({
     name: "",
     email: "",
     password: "",
-  });  
+  });
 
   const handleChange = (e) => {
-    setValues({...values, [e.target.name] : e.target.value});
-  }
+    setValues({ ...values, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const {name, email, password} = values;
+    const { name, email, password } = values;
 
-    if(!name || !email || !password){
+    if (!name || !email || !password) {
       return;
     }
-    
+
     console.log(name, email, password);
 
+    try {
+      const user = await createUserWithEmailAndPassword(auth, email, password);
 
-    try{
-
-      const user  = await createUserWithEmailAndPassword(auth, email, password);
-      
       await updateProfile(auth.currentUser, {
         displayName: name,
       });
@@ -54,28 +53,20 @@ const Register = () => {
       });
 
       redirect("/login");
-
-    }
-    catch(err){
+    } catch (err) {
       console.error("error: " + err);
     }
-
-
-  }
-
+  };
 
   const handleGoogleSignIn = async () => {
-    try{
-
+    try {
       const user = await signInWithPopup(auth, provider);
-  
+
       console.log("user: ", user);
-    }
-    catch(err){
+    } catch (err) {
       console.log("error", err);
     }
-
-  }
+  };
 
   return (
     <main className="flex flex-col lg:flex-row lg:h-screen">
@@ -95,12 +86,18 @@ const Register = () => {
           <h1 className="text-4xl md:text-6xl font-semibold">Sign Up</h1>
           <p className="mt-6 ml-1">
             Already have an account?{" "}
-            <Link href="/login" className="underline hover:text-blue-400 cursor-pointer">
+            <Link
+              href="/login"
+              className="underline hover:text-blue-400 cursor-pointer"
+            >
               Login
             </Link>
           </p>
 
-          <div onClick={handleGoogleSignIn} className="bg-black/[0.05] text-white w-full py-4 mt-10 rounded-full transition-transform hover:bg-black/[0.8] active:scale-90 flex justify-center items-center gap-4 cursor-pointer group">
+          <div
+            onClick={handleGoogleSignIn}
+            className="bg-black/[0.05] text-white w-full py-4 mt-10 rounded-full transition-transform hover:bg-black/[0.8] active:scale-90 flex justify-center items-center gap-4 cursor-pointer group"
+          >
             <FcGoogle size={22} />
             <span className="font-medium text-black group-hover:text-white">
               Login with Google
@@ -143,7 +140,10 @@ const Register = () => {
               required
             />
           </div>
-          <button className="bg-black text-white w-44 py-4 mt-10 rounded-full transition-transform hover:bg-black/[0.8] active:scale-90" onClick={handleSubmit}>
+          <button
+            className="bg-black text-white w-44 py-4 mt-10 rounded-full transition-transform hover:bg-black/[0.8] active:scale-90"
+            onClick={handleSubmit}
+          >
             Sign Up
           </button>
         </div>
