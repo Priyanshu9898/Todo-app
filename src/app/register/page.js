@@ -30,7 +30,7 @@ const Register = () => {
     if(!isLoading && authUser) {
       router.push('/')
     }
-  }, [authUser, isLoading]);
+  }, [authUser, isLoading, router]);
 
   const handleChange = (e) => {
     setValues({ ...values, [e.target.name]: e.target.value });
