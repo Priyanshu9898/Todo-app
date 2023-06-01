@@ -28,8 +28,11 @@ const Home = () => {
     if(authUser) {
       fetchTodos(authUser.uid);
     }
+    else{
+      router.push("/login");
+    }
     
-  }, [authUser, isLoading]);
+  }, [authUser, isLoading, router]);
 
   const handleLogoutClick = () => {
     HandleSignOut();
