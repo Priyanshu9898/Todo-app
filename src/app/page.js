@@ -8,7 +8,7 @@ import { useAuth } from "@firebase/auth";
 import { useRouter } from "next/navigation";
 import Loading from "./loading";
 import { db } from "@firebase/firebase";
-import { collection, addDoc, getDoc, setDoc, updateDoc, query, doc, where, deleteDoc  } from "firebase/firestore";
+import { collection, addDoc, getDoc, setDoc, updateDoc, query, doc, where, deleteDoc, getDocs  } from "firebase/firestore";
 import { useEffect, useState } from "react";
 const arr = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -27,6 +27,10 @@ const Home = () => {
   const { authUser, isLoading, HandleSignOut} = useAuth();
 
   useEffect(() => {
+
+    if(authUser) {
+      fetchTodos(authUser.uid);
+    }
     
   }, [authUser, isLoading]);
 
@@ -50,13 +54,39 @@ const Home = () => {
         owner: authUser.uid,
       });
 
-      console.log("Document written with ID: ", docRef.id);
+      // console.log("Document written with ID: ", docRef.id);
+
+      fetchTodos(authUser.uid);
+
+      setTodo("");
+
     } catch (e) {
       console.error("Error adding document: ", e);
     }
   }
 
-  return (!isLoading && !authUser) ? (<><Loading /></>) : (
+
+  const fetchTodos = async (uid) => {
+    try {
+      const q = query(collection(db, "todos"), where("owner", "==", uid));
+      const data = []
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        // console.log(doc.id, " => ", doc.data());
+
+        data.push({...doc.data(), id: doc.id});
+      });
+
+
+      setAllTodos(data);
+
+    } catch (e) {
+      console.log("Error getting cached document:", e);
+    }
+  }
+
+  return (!authUser) ? (<><Loading /></>) : (
     <main className="max-w-screen-lg mx-auto p-8">
       <div onClick={handleLogoutClick} className="flex justify-end mt-10 space-x-2">
         <div className="bg-black text-white w-32 py-4 rounded-lg transition-transform hover:bg-black/[0.8] active:scale-90 flex items-center justify-center gap-2 font-medium shadow-md fixed bottom-5 right-5 cursor-pointer">
@@ -86,22 +116,24 @@ const Home = () => {
           </div>
         </div>
         <div className="my-10">
-          {arr.map((todo, index) => (
-            <div key={index} className="flex items-center justify-between mt-4">
+          {allTodos.length > 0 && allTodos.map((todo, index) => (
+            <div key={todo.id} className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-3">
                 <input
-                  id={`todo-${index}`}
+                  id={`todo-${todo.id}`}
                   type="checkbox"
                   className="w-4 h-4 accent-green-400 rounded-lg"
+                  value={todo.completed}
                 />
-                <label htmlFor={`todo-${index}`} className="font-medium">
-                  This is my first todo
+                <label htmlFor={`todo-${todo.id}`} className="font-medium">
+                  {todo.content}
                 </label>
               </div>
-              <div className="flex items-center gap-3">
+              <div id={`todo-${todo.id}`} className="flex items-center gap-3">
                 <MdDeleteForever
                   size={24}
                   className="text-red-400 hover:text-red-600 cursor-pointer"
+                  
                 />
               </div>
             </div>
