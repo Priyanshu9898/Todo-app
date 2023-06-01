@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,15 +10,32 @@ import {
   signInWithPopup, 
 } from "firebase/auth";
 import { auth } from "../../firebase/firebase.js";
-import { redirect } from "next/navigation";
+import { useRouter } from 'next/navigation';
+import { useAuth } from "@firebase/auth.js";
+import Loading from "../loading.js";
+
+
 
 const Login = () => {
+  const router = useRouter();
+  
   const provider = new GoogleAuthProvider();
 
   const [values, setValues] = useState({
     email: "",
     password: "",
   });
+
+  const {authUser, isLoading} = useAuth();
+
+
+
+
+  useEffect(() => {
+    if(!isLoading && authUser) {
+      router.push('/')
+    }
+  }, [authUser, isLoading]);
 
   const handleChange = (e) => {
     setValues({ ...values, [e.target.name]: e.target.value });
@@ -53,7 +70,7 @@ const Login = () => {
     }
   };
 
-  return (
+  return ( isLoading || (!isLoading && authUser) ? (<><Loading /> </>) : (
     <main className="flex flex-col lg:flex-row lg:h-screen">
       <div className="w-full lg:w-2/5">
         <div className="h-48 lg:h-full relative">
@@ -122,6 +139,7 @@ const Login = () => {
         </div>
       </div>
     </main>
+  )
   );
 };
 

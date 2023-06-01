@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,15 +12,25 @@ import {
 } from "firebase/auth";
 import { auth } from "../../firebase/firebase.js";
 import { redirect } from "next/navigation";
+import { useRouter } from 'next/navigation';
+import { useAuth } from "@firebase/auth.js";
+import Loading from "../loading.js";
 
 const Register = () => {
+  const router = useRouter();
   const provider = new GoogleAuthProvider();
-
+  const {authUser, isLoading, setAuthUser} = useAuth();
   const [values, setValues] = useState({
     name: "",
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    if(!isLoading && authUser) {
+      router.push('/')
+    }
+  }, [authUser, isLoading]);
 
   const handleChange = (e) => {
     setValues({ ...values, [e.target.name]: e.target.value });
@@ -43,6 +53,12 @@ const Register = () => {
       await updateProfile(auth.currentUser, {
         displayName: name,
       });
+
+      setAuthUser({
+        uid: user.uid,
+        name: user.displayName,
+        email: user.email
+      })
 
       console.log("User created successfully ", user);
 
@@ -68,7 +84,7 @@ const Register = () => {
     }
   };
 
-  return (
+  return ( isLoading || (!isLoading && authUser) ? (<><Loading /> </>) : (
     <main className="flex flex-col lg:flex-row lg:h-screen">
       <div className="w-full lg:w-2/5">
         <div className="h-48 lg:h-full relative">
@@ -149,6 +165,7 @@ const Register = () => {
         </div>
       </div>
     </main>
+  )
   );
 };
 

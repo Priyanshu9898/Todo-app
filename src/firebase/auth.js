@@ -34,7 +34,7 @@ export const useFirebaseAuth = () => {
 
     const HandleSignOut = async () => {
         try{
-            await signOut(auth);
+            signOut(auth);
 
             setAuthUser(null);
             setIsLoading(false);
