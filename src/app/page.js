@@ -10,9 +10,6 @@ import Loading from "./loading";
 import { db } from "@firebase/firebase";
 import { collection, addDoc, getDoc, setDoc, updateDoc, query, doc, where, deleteDoc, getDocs  } from "firebase/firestore";
 import { useEffect, useState } from "react";
-const arr = [
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-];
 
 
 
@@ -48,11 +45,16 @@ const Home = () => {
     try {
 
       console.log(todo, authUser.uid);
-      const docRef = await addDoc(collection(db, "todos"), {
-        content: todo,
-        completed: false,
-        owner: authUser.uid,
-      });
+
+      if(todo.length > 0) {
+
+        const docRef = await addDoc(collection(db, "todos"), {
+          content: todo,
+          completed: false,
+          owner: authUser.uid,
+        });
+
+      }
 
       // console.log("Document written with ID: ", docRef.id);
 
@@ -86,6 +88,21 @@ const Home = () => {
     }
   }
 
+
+  const deteteTodoItem = async (uid) => {
+    try{
+      await deleteDoc(doc(db, "todos", uid));
+
+      console.log("delete document successfully");
+
+      fetchTodos(authUser.uid);
+
+    }
+    catch(err){
+      console.log("Error deleting document:", err);
+    }
+  }
+
   return (!authUser) ? (<><Loading /></>) : (
     <main className="max-w-screen-lg mx-auto p-8">
       <div onClick={handleLogoutClick} className="flex justify-end mt-10 space-x-2">
@@ -98,7 +115,7 @@ const Home = () => {
         <div className="bg-white -m-6 p-3 sticky top-0">
           <div className="flex flex-col items-center space-y-4">
             <span className="text-6xl md:text-6xl">📝</span>
-            <h1 className="text-3xl md:text-4xl font-bold">ToooDooo's</h1>
+            <h1 className="text-3xl md:text-4xl font-bold">ToooDooo&apos;s</h1>
           </div>
           <div className="flex items-center gap-2 mt-10">
             <input
@@ -129,7 +146,7 @@ const Home = () => {
                   {todo.content}
                 </label>
               </div>
-              <div id={`todo-${todo.id}`} className="flex items-center gap-3">
+              <div onClick={() => deteteTodoItem(todo.id)} id={`todo-${todo.id}`} className="flex items-center gap-3">
                 <MdDeleteForever
                   size={24}
                   className="text-red-400 hover:text-red-600 cursor-pointer"
