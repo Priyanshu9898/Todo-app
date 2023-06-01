@@ -7,6 +7,9 @@ import { GoSignOut } from "react-icons/go";
 import { useAuth } from "@firebase/auth";
 import { useRouter } from "next/navigation";
 import Loading from "./loading";
+import { db } from "@firebase/firebase";
+import { collection, addDoc, getDoc, setDoc, updateDoc, query, doc, where, deleteDoc  } from "firebase/firestore";
+import { useEffect, useState } from "react";
 const arr = [
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
 ];
@@ -15,15 +18,42 @@ const arr = [
 
 const Home = () => {
 
+  const [todo, setTodo] = useState("");
+  const [allTodos, setAllTodos] = useState([]);
+
+
   const router = useRouter();
 
-  
-  const { authUser, setAuthUser, isLoading, HandleSignOut} = useAuth();
+  const { authUser, isLoading, HandleSignOut} = useAuth();
+
+  useEffect(() => {
+    
+  }, [authUser, isLoading]);
 
   const handleLogoutClick = () => {
     HandleSignOut();
     router.push("/login");
+  }
 
+  const handleChange = (e) => {
+    setTodo(e.target.value);
+  }
+
+
+  const addTodo = async () => {
+    try {
+
+      console.log(todo, authUser.uid);
+      const docRef = await addDoc(collection(db, "todos"), {
+        content: todo,
+        completed: false,
+        owner: authUser.uid,
+      });
+
+      console.log("Document written with ID: ", docRef.id);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
   }
 
   return (!isLoading && !authUser) ? (<><Loading /></>) : (
@@ -42,12 +72,15 @@ const Home = () => {
           </div>
           <div className="flex items-center gap-2 mt-10">
             <input
-              placeholder={`👋 Hello name, What to do Today?`}
+              placeholder={`👋 Hello ${authUser?.name}, What to do Today?`}
               type="text"
+              name="todo"
               className="font-semibold placeholder:text-gray-500 border-[2px] border-black h-[60px] w-full sm:w-auto grow shadow-sm rounded-md px-4 focus-visible:outline-yellow-400 text-lg transition-all duration-300"
               autoFocus
+              value={todo}
+              onChange = {handleChange}
             />
-            <button className="w-[60px] h-[60px] rounded-md bg-black flex justify-center items-center cursor-pointer transition-all duration-300 hover:bg-black/[0.8]">
+            <button onClick={addTodo} className="w-[60px] h-[60px] rounded-md bg-black flex justify-center items-center cursor-pointer transition-all duration-300 hover:bg-black/[0.8]">
               <AiOutlinePlus size={30} color="#fff" />
             </button>
           </div>

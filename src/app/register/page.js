@@ -48,7 +48,7 @@ const Register = () => {
     console.log(name, email, password);
 
     try {
-      const user = await createUserWithEmailAndPassword(auth, email, password);
+      const {user} = await createUserWithEmailAndPassword(auth, email, password);
 
       await updateProfile(auth.currentUser, {
         displayName: name,
