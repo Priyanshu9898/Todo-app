@@ -103,6 +103,28 @@ const Home = () => {
     }
   }
 
+  const handleUpdateChange = async (e, uid) => {
+
+    try{
+
+      console.log(uid);
+
+      const item = doc(db, "todos", uid);
+
+      console.log(item);
+      // Set the "capital" field of the city 'DC'
+      await updateDoc(item, {
+        completed: e.target.checked,
+      });
+
+      console.log("Updated successfully")
+      fetchTodos(authUser.uid);
+    }
+    catch(err){
+      console.log("Error updating document:", err);
+    }
+  }
+
   return (!authUser) ? (<><Loading /></>) : (
     <main className="max-w-screen-lg mx-auto p-8">
       <div onClick={handleLogoutClick} className="flex justify-end mt-10 space-x-2">
@@ -140,14 +162,15 @@ const Home = () => {
                   id={`todo-${todo.id}`}
                   type="checkbox"
                   className="w-4 h-4 accent-green-400 rounded-lg"
-                  value={todo.completed}
+                  checked={todo.completed}
+                  onChange={(e) => handleUpdateChange(e, todo.id)}
                 />
-                <label htmlFor={`todo-${todo.id}`} className="font-medium">
+                <label htmlFor={`todo-${todo.id}`} className={`font-medium ${todo.completed ? "line-through": ""}  `}>
                   {todo.content}
                 </label>
               </div>
-              <div onClick={() => deteteTodoItem(todo.id)} id={`todo-${todo.id}`} className="flex items-center gap-3">
-                <MdDeleteForever
+              <div  id={`todo-${todo.id}`} className="flex items-center gap-3">
+                <MdDeleteForever onClick={() => deteteTodoItem(todo.id)}
                   size={24}
                   className="text-red-400 hover:text-red-600 cursor-pointer"
                   
